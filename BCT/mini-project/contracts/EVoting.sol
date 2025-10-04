@@ -24,7 +24,7 @@ contract EVoting {
     event VoteCast(address voter, uint candidateId);
 
     constructor() {
-        admin = msg.sender;
+        admin = msg.sender; // Contract deployer is admin
     }
 
     modifier onlyAdmin() {
