@@ -5,7 +5,7 @@ import AdminPanel from "./components/AdminPanel";
 import VoterDashboard from "./components/VoterDashboard";
 import ElectionStatusBadge from "./components/ElectionStatusBadge";
 
-const CONTRACT_ADDRESS = "0x70ac6f5891C7e8a07785BC28357Ea5B4A238Ff9F";
+const CONTRACT_ADDRESS = "0xea7562F7E84Bcf0f2Aa3D0a5374d6CcC283072fb";
 
 type Candidate = {
   id: number;
