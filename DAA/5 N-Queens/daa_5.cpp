@@ -1,58 +1,39 @@
 #include <iostream>
 #include <vector>
-#include <ctime>
-
+#include <chrono>
 using namespace std;
+using namespace std::chrono;
 
-// Function to check if placing a queen at (row, col) is safe
-bool isSafe(const vector<int>& rows,
-            const vector<int>& hills,
-            const vector<int>& dales,
+// Check if it's safe to place a queen at (row, col)
+bool isSafe(const vector<int>& rows, const vector<int>& hills, const vector<int>& dales,
             int row, int col, int n) {
-    // Calculate hill (/) and dale (\) diagonal indices
-    int hillIndex = row - col + n - 1;
-    int daleIndex = row + col;
-    // Safe if row, hill, and dale are free
-    return !rows[row] && !hills[hillIndex] && !dales[daleIndex];
+    int hill = row - col + n - 1, dale = row + col;
+    return !rows[row] && !hills[hill] && !dales[dale];
 }
 
-// Column-wise backtracking to place queens
-bool solveNQueensUtil(int col, int n,
-                      vector<int>& queens,
-                      vector<int>& rows,
-                      vector<int>& hills,
-                      vector<int>& dales,
-                      int firstCol) {
-    if (col >= n) return true; // All queens placed
-
-    // Skip the column of the first pre-placed queen
-    if (col == firstCol) {
-        return solveNQueensUtil(col + 1, n, queens, rows, hills, dales, firstCol);
-    }
+// Backtracking function
+bool solve(int col, int n, vector<int>& queens,
+           vector<int>& rows, vector<int>& hills, vector<int>& dales, int fixedCol) {
+    if (col >= n) return true;
+    if (col == fixedCol) return solve(col + 1, n, queens, rows, hills, dales, fixedCol);
 
     for (int row = 0; row < n; row++) {
         if (isSafe(rows, hills, dales, row, col, n)) {
-            // Place queen
             queens[col] = row;
-            rows[row] = 1;
-            hills[row - col + n - 1] = 1;
-            dales[row + col] = 1;
+            rows[row] = hills[row - col + n - 1] = dales[row + col] = 1;
 
-            if (solveNQueensUtil(col + 1, n, queens, rows, hills, dales, firstCol))
-                return true; // Solution found
+            if (solve(col + 1, n, queens, rows, hills, dales, fixedCol))
+                return true;
 
             // Backtrack
             queens[col] = -1;
-            rows[row] = 0;
-            hills[row - col + n - 1] = 0;
-            dales[row + col] = 0;
+            rows[row] = hills[row - col + n - 1] = dales[row + col] = 0;
         }
     }
-
-    return false; // No valid placement in this column
+    return false;
 }
 
-// Print the board
+// Print the N-Queens board
 void printBoard(const vector<int>& queens, int n) {
     for (int i = 0; i < n; i++) {
         for (int j = 0; j < n; j++)
@@ -62,43 +43,40 @@ void printBoard(const vector<int>& queens, int n) {
 }
 
 int main() {
-    int n;
-    cout << "Enter the value of N: ";
+    int n, fixedRow, fixedCol;
+    cout << "Enter value of N: ";
     cin >> n;
+    cout << "Enter row and column of first queen (0-indexed): ";
+    cin >> fixedRow >> fixedCol;
 
-    int firstRow, firstCol;
-    cout << "Enter the row and column for the first queen (0-indexed): ";
-    cin >> firstRow >> firstCol;
-
-    if (firstRow < 0 || firstRow >= n || firstCol < 0 || firstCol >= n) {
-        cout << "Invalid position for first queen." << endl;
+    if (fixedRow < 0 || fixedRow >= n || fixedCol < 0 || fixedCol >= n) {
+        cout << "Invalid position.\n";
         return 1;
     }
 
-    vector<int> queens(n, -1);       // queens[col] = row
-    queens[firstCol] = firstRow;     // Place first queen
+    vector<int> queens(n, -1), rows(n, 0), hills(2 * n - 1, 0), dales(2 * n - 1, 0);
+    queens[fixedCol] = fixedRow;
+    rows[fixedRow] = hills[fixedRow - fixedCol + n - 1] = dales[fixedRow + fixedCol] = 1;
 
-    vector<int> rows(n, 0);          // Rows occupied
-    vector<int> hills(2 * n - 1, 0); // Major diagonals (/)
-    vector<int> dales(2 * n - 1, 0); // Minor diagonals (\)
+    auto start = high_resolution_clock::now();
+    bool solved = solve(0, n, queens, rows, hills, dales, fixedCol);
+    auto end = high_resolution_clock::now();
 
-    // Mark the first queen’s threats
-    rows[firstRow] = 1;
-    hills[firstRow - firstCol + n - 1] = 1;
-    dales[firstRow + firstCol] = 1;
+    double duration = duration_cast<nanoseconds>(end - start).count();
+    size_t spaceUsed = sizeof(int) * (queens.size() * 4 + (2 * n - 1) * 2);
 
-    clock_t start = clock();
-
-    if (solveNQueensUtil(0, n, queens, rows, hills, dales, firstCol)) {
-        cout << "Solution found:\n";
+    cout << "\n-----------------------------------------\n";
+    cout << "             [ N-Queens Results ]         \n";
+    cout << "-----------------------------------------\n";
+    if (solved) {
+        cout << "Solution Found:\n";
         printBoard(queens, n);
     } else {
-        cout << "No solution exists with the first queen at this position.\n";
+        cout << "No valid solution.\n";
     }
-
-    clock_t end = clock();
-    double time_taken = double(end - start) / CLOCKS_PER_SEC;
-    cout << "Execution time: " << time_taken << " seconds" << endl;
+    cout << "Execution Time  : " << duration << " ns\n";
+    cout << "Estimated Space : " << spaceUsed << " bytes\n";
+    cout << "-----------------------------------------\n";
 
     return 0;
 }

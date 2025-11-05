@@ -1,112 +1,92 @@
 #include <iostream>
 #include <vector>
-#include <ctime>
-#include <cstdlib> // For rand()
-
+#include <chrono>
+#include <cstdlib>
 using namespace std;
+using namespace std::chrono;
 
-// Global counters for comparisons
-long long deterministicComparisons = 0;
-long long randomizedComparisons = 0;
+long long detComparisons = 0, randComparisons = 0;
 
-// Swap two elements
-void swap(int &a, int &b) {
-    int temp = a;
-    a = b;
-    b = temp;
-}
+// Swap helper
+inline void swap(int &a, int &b) { int t = a; a = b; b = t; }
 
-// Partition function for deterministic QuickSort (pivot = last element)
-int deterministicPartition(vector<int>& arr, int low, int high) {
-    int pivot = arr[high];
-    int i = low - 1;
-    for(int j = low; j < high; j++) {
-        deterministicComparisons++;
-        if(arr[j] <= pivot) {
-            i++;
-            swap(arr[i], arr[j]);
-        }
+// Deterministic partition (pivot = last)
+int detPartition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high], i = low - 1;
+    for (int j = low; j < high; j++) {
+        detComparisons++;
+        if (arr[j] <= pivot) swap(arr[++i], arr[j]);
     }
-    swap(arr[i+1], arr[high]);
-    return i+1;
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
 }
 
 // Deterministic QuickSort
-void deterministicQuickSort(vector<int>& arr, int low, int high) {
-    if(low < high) {
-        int pi = deterministicPartition(arr, low, high);
-        deterministicQuickSort(arr, low, pi - 1);
-        deterministicQuickSort(arr, pi + 1, high);
+void detQuickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = detPartition(arr, low, high);
+        detQuickSort(arr, low, pi - 1);
+        detQuickSort(arr, pi + 1, high);
     }
 }
 
-// Partition function for randomized QuickSort
-int randomizedPartition(vector<int>& arr, int low, int high) {
-    int pivotIndex = low + rand() % (high - low + 1); // Random pivot
-    swap(arr[pivotIndex], arr[high]);                 // Move pivot to end
-    int pivot = arr[high];
-    int i = low - 1;
-    for(int j = low; j < high; j++) {
-        randomizedComparisons++;
-        if(arr[j] <= pivot) {
-            i++;
-            swap(arr[i], arr[j]);
-        }
+// Randomized partition (random pivot)
+int randPartition(vector<int>& arr, int low, int high) {
+    int pivotIndex = low + rand() % (high - low + 1);
+    swap(arr[pivotIndex], arr[high]);
+    int pivot = arr[high], i = low - 1;
+    for (int j = low; j < high; j++) {
+        randComparisons++;
+        if (arr[j] <= pivot) swap(arr[++i], arr[j]);
     }
-    swap(arr[i+1], arr[high]);
-    return i+1;
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
 }
 
 // Randomized QuickSort
-void randomizedQuickSort(vector<int>& arr, int low, int high) {
-    if(low < high) {
-        int pi = randomizedPartition(arr, low, high);
-        randomizedQuickSort(arr, low, pi - 1);
-        randomizedQuickSort(arr, pi + 1, high);
+void randQuickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = randPartition(arr, low, high);
+        randQuickSort(arr, low, pi - 1);
+        randQuickSort(arr, pi + 1, high);
     }
-}
-
-// Function to print array
-void printArray(const vector<int>& arr) {
-    for(int x : arr)
-        cout << x << " ";
-    cout << endl;
 }
 
 int main() {
     int n;
-    cout << "Enter the number of elements: ";
+    cout << "Enter number of elements: ";
     cin >> n;
 
     vector<int> arr(n);
-    cout << "Enter the elements:\n";
-    for(int i = 0; i < n; i++) cin >> arr[i];
+    cout << "Enter elements:\n";
+    for (int i = 0; i < n; i++) cin >> arr[i];
 
-    // Copy array for deterministic and randomized sorting
-    vector<int> arrDeterministic = arr;
-    vector<int> arrRandomized = arr;
+    vector<int> detArr = arr, randArr = arr;
+    srand(time(0));
 
-    srand(time(0)); // Seed random number generator
+    auto start = high_resolution_clock::now();
+    detQuickSort(detArr, 0, n - 1);
+    auto end = high_resolution_clock::now();
+    double detTime = duration_cast<nanoseconds>(end - start).count();
 
-    // Deterministic QuickSort
-    clock_t start = clock();
-    deterministicQuickSort(arrDeterministic, 0, n-1);
-    clock_t end = clock();
-    double detTime = double(end - start) / CLOCKS_PER_SEC;
+    start = high_resolution_clock::now();
+    randQuickSort(randArr, 0, n - 1);
+    end = high_resolution_clock::now();
+    double randTime = duration_cast<nanoseconds>(end - start).count();
 
-    // Randomized QuickSort
-    start = clock();
-    randomizedQuickSort(arrRandomized, 0, n-1);
-    end = clock();
-    double randTime = double(end - start) / CLOCKS_PER_SEC;
+    size_t spaceUsed = sizeof(int) * (arr.size() * 2) + sizeof(long long) * 2;
 
-    cout << "\nSorted array (Deterministic QuickSort):\n";
-    printArray(arrDeterministic);
-    cout << "Comparisons: " << deterministicComparisons << ", Time: " << detTime << " seconds\n";
-
-    cout << "\nSorted array (Randomized QuickSort):\n";
-    printArray(arrRandomized);
-    cout << "Comparisons: " << randomizedComparisons << ", Time: " << randTime << " seconds\n";
+    cout << "\n-----------------------------------------\n";
+    cout << "     [ QuickSort Performance Results ]   \n";
+    cout << "-----------------------------------------\n";
+    cout << "Deterministic QuickSort:\n";
+    cout << "Comparisons : " << detComparisons << "\n";
+    cout << "Time Taken  : " << detTime << " ns\n\n";
+    cout << "Randomized QuickSort:\n";
+    cout << "Comparisons : " << randComparisons << "\n";
+    cout << "Time Taken  : " << randTime << " ns\n";
+    cout << "\nEstimated Space : " << spaceUsed << " bytes\n";
+    cout << "-----------------------------------------\n";
 
     return 0;
 }

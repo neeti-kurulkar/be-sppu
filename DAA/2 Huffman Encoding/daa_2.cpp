@@ -1,113 +1,111 @@
 #include <iostream>
 #include <vector>
 #include <queue>
-#include <chrono>
 #include <map>
+#include <chrono>
 #include <cmath>
-#include <iomanip>
-#include <algorithm>
 using namespace std;
+using namespace std::chrono;
 
 class Node {
 public:
-    int freq;
     char symbol;
+    int freq;
     Node* left;
     Node* right;
-    char huff;
 
-    Node(int freq, char symbol, Node* left = nullptr, Node* right = nullptr)
-        : freq(freq), symbol(symbol), left(left), right(right), huff(0) {}
+    Node(char s, int f) : symbol(s), freq(f), left(nullptr), right(nullptr) {}
+};
 
-    bool operator<(const Node& other) const {
-        return freq > other.freq; // For min-heap behavior in priority_queue
+// Comparator for min-heap
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        return a->freq > b->freq;
     }
 };
 
-void calculateHuffmanCodes(const Node* node, const string& code, map<char, string>& huffmanCodes) {
-    if (node) {
-        if (!node->left && !node->right) {
-            huffmanCodes[node->symbol] = code;
-        }
-        calculateHuffmanCodes(node->left, code + "0", huffmanCodes);
-        calculateHuffmanCodes(node->right, code + "1", huffmanCodes);
+// Recursive function to generate Huffman codes
+void generateCodes(Node* root, string code, map<char, string>& codes) {
+    if (!root) return;
+    if (!root->left && !root->right) {
+        codes[root->symbol] = code;
     }
+    generateCodes(root->left, code + "0", codes);
+    generateCodes(root->right, code + "1", codes);
 }
 
 int main() {
     int n;
-    cout << "Enter the number of characters: ";
+    cout << "Enter number of characters: ";
     cin >> n;
 
     vector<char> chars(n);
-    vector<int> freq(n);
+    vector<int> freqs(n);
 
     cout << "\nEnter characters and their frequencies:\n";
     for (int i = 0; i < n; ++i) {
         cout << "Character " << i + 1 << ": ";
         cin >> chars[i];
         cout << "Frequency of " << chars[i] << ": ";
-        cin >> freq[i];
+        cin >> freqs[i];
     }
 
-    priority_queue<Node> nodes;
+    // Measure tree construction time
+    auto start_tree = high_resolution_clock::now();
+
+    priority_queue<Node*, vector<Node*>, Compare> pq;
     for (int i = 0; i < n; ++i) {
-        nodes.push(Node(freq[i], chars[i]));
+        pq.push(new Node(chars[i], freqs[i]));
     }
 
-    cout << "\n------------------------------------------\n";
-    cout << "[ Huffman Tree Construction ]\n";
+    while (pq.size() > 1) {
+        Node* left = pq.top(); pq.pop();
+        Node* right = pq.top(); pq.pop();
 
-    auto start_time = chrono::high_resolution_clock::now();
+        Node* merged = new Node('\0', left->freq + right->freq);
+        merged->left = left;
+        merged->right = right;
 
-    while (nodes.size() > 1) {
-        Node* left = new Node(nodes.top());
-        nodes.pop();
-        Node* right = new Node(nodes.top());
-        nodes.pop();
-
-        left->huff = '0';
-        right->huff = '1';
-
-        Node* merged = new Node(left->freq + right->freq, left->symbol + right->symbol, left, right);
-        nodes.push(*merged);
+        pq.push(merged);
     }
 
-    auto end_time = chrono::high_resolution_clock::now();
-    auto duration = chrono::duration_cast<chrono::nanoseconds>(end_time - start_time);
-    cout << "Time required             : " << duration.count() << " nanoseconds\n";
+    Node* root = pq.top();
+    auto end_tree = high_resolution_clock::now();
 
-    cout << "\n[ Huffman Code Generation ]\n";
-
-    auto code_start = chrono::high_resolution_clock::now();
+    // Measure code generation time
+    auto start_code = high_resolution_clock::now();
     map<char, string> huffmanCodes;
-    calculateHuffmanCodes(&nodes.top(), "", huffmanCodes);
-    auto code_end = chrono::high_resolution_clock::now();
+    generateCodes(root, "", huffmanCodes);
+    auto end_code = high_resolution_clock::now();
 
-    auto code_duration = chrono::duration_cast<chrono::nanoseconds>(code_end - code_start);
-    cout << "Time required             : " << code_duration.count() << " nanoseconds\n";
-
-    cout << "\n[ Space Estimation ]\n";
-
-    auto space_start = chrono::high_resolution_clock::now();
-    double spaceUsed = 0;
-    for (const auto& kv : huffmanCodes) {
-        spaceUsed += kv.second.length() * freq[find(chars.begin(), chars.end(), kv.first) - chars.begin()];
+    // Measure space used
+    auto start_space = high_resolution_clock::now();
+    double totalBits = 0;
+    for (size_t i = 0; i < n; ++i) {
+        totalBits += freqs[i] * huffmanCodes[chars[i]].length();
     }
-    spaceUsed = ceil(spaceUsed / 8); // Convert bits to bytes
-    auto space_end = chrono::high_resolution_clock::now();
+    double spaceUsed = ceil(totalBits / 8.0); // in bytes
+    auto end_space = high_resolution_clock::now();
 
-    auto space_duration = chrono::duration_cast<chrono::nanoseconds>(space_end - space_start);
-    cout << "Estimated space used      : " << spaceUsed << " bytes\n";
-    cout << "Space calculation time    : " << space_duration.count() << " nanoseconds\n";
+    // Compute durations
+    auto treeTime = duration_cast<nanoseconds>(end_tree - start_tree).count();
+    auto codeTime = duration_cast<nanoseconds>(end_code - start_code).count();
+    auto spaceTime = duration_cast<nanoseconds>(end_space - start_space).count();
 
-    cout << "\n[ Huffman Codes ]\n";
-    cout << left << setw(10) << "Char" << setw(10) << "Code" << endl;
-    cout << "---------------------------\n";
-    for (const auto& kv : huffmanCodes) {
-        cout << left << setw(10) << kv.first << setw(10) << kv.second << endl;
+    cout << "\n--------------------------------------------\n";
+    cout << "        [ Huffman Coding Results ]          \n";
+    cout << "--------------------------------------------\n";
+
+    cout << "Tree Construction Time : " << treeTime << " ns\n";
+    cout << "Code Generation Time   : " << codeTime << " ns\n";
+    cout << "Space Calculation Time : " << spaceTime << " ns\n";
+    cout << "Estimated Space Used   : " << spaceUsed << " bytes\n";
+
+    cout << "\nHuffman Codes:\n";
+    for (auto& kv : huffmanCodes) {
+        cout << kv.first << " : " << kv.second << endl;
     }
 
-    cout << "------------------------------------------\n";
+    cout << "--------------------------------------------\n";
     return 0;
 }
