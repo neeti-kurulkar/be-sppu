@@ -87,18 +87,18 @@ int main() {
     double spaceUsed = ceil(totalBits / 8.0); // in bytes
     auto end_space = high_resolution_clock::now();
 
-    // Compute durations
-    auto treeTime = duration_cast<nanoseconds>(end_tree - start_tree).count();
-    auto codeTime = duration_cast<nanoseconds>(end_code - start_code).count();
-    auto spaceTime = duration_cast<nanoseconds>(end_space - start_space).count();
+    // Compute durations in milliseconds
+    auto treeTime = duration_cast<milliseconds>(end_tree - start_tree).count();
+    auto codeTime = duration_cast<milliseconds>(end_code - start_code).count();
+    auto spaceTime = duration_cast<milliseconds>(end_space - start_space).count();
 
     cout << "\n--------------------------------------------\n";
     cout << "        [ Huffman Coding Results ]          \n";
     cout << "--------------------------------------------\n";
 
-    cout << "Tree Construction Time : " << treeTime << " ns\n";
-    cout << "Code Generation Time   : " << codeTime << " ns\n";
-    cout << "Space Calculation Time : " << spaceTime << " ns\n";
+    cout << "Tree Construction Time : " << treeTime << " ms\n";
+    cout << "Code Generation Time   : " << codeTime << " ms\n";
+    cout << "Space Calculation Time : " << spaceTime << " ms\n";
     cout << "Estimated Space Used   : " << spaceUsed << " bytes\n";
 
     cout << "\nHuffman Codes:\n";

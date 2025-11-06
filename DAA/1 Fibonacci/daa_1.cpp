@@ -31,15 +31,15 @@ int main() {
     int result_iter = fib_iterative(n);
     auto end_iter = high_resolution_clock::now();
 
-    double time_iter = duration<double>(end_iter - start_iter).count();
-    int space_iter = sizeof(int) * 3;  // a, b, c (constant space)
+    auto time_iter_ms = duration_cast<milliseconds>(end_iter - start_iter).count();
+    int space_iter = sizeof(int) * 3;  // constant space
 
     // Recursive Fibonacci timing
     auto start_rec = high_resolution_clock::now();
     int result_rec = fib_recursive(n);
     auto end_rec = high_resolution_clock::now();
 
-    double time_rec = duration<double>(end_rec - start_rec).count();
+    auto time_rec_ms = duration_cast<milliseconds>(end_rec - start_rec).count();
     int space_rec = sizeof(int) * n;   // roughly O(n) due to recursion depth
 
     // Output results
@@ -49,12 +49,12 @@ int main() {
 
     cout << "[ Iterative Approach ]\n";
     cout << "Fibonacci(" << n << ") = " << result_iter << endl;
-    cout << "Time taken   : " << time_iter << " seconds\n";
+    cout << "Time taken   : " << time_iter_ms << " milliseconds\n";
     cout << "Space used   : " << space_iter << " bytes\n";
 
     cout << "\n[ Recursive Approach ]\n";
     cout << "Fibonacci(" << n << ") = " << result_rec << endl;
-    cout << "Time taken   : " << time_rec << " seconds\n";
+    cout << "Time taken   : " << time_rec_ms << " milliseconds\n";
     cout << "Space used   : " << space_rec << " bytes\n";
 
     cout << "------------------------------------------\n";

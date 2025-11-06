@@ -1,67 +1,74 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
-
+#include <chrono>
+#include <cmath>
 using namespace std;
+using namespace std::chrono;
 
-// Structure to represent an item with weight and value
 struct Item {
-    int weight;
-    int value;
+    int weight, value;
 };
 
-// Comparator function to sort items by value-to-weight ratio in descending order
-bool compareByRatio(const Item &a, const Item &b) {
-    double ratioA = static_cast<double>(a.value) / a.weight;
-    double ratioB = static_cast<double>(b.value) / b.weight;
-    return ratioA > ratioB;
-}
+double fractionalKnapsack(int capacity, vector<Item>& items) {
+    // Step 1: Calculate value-to-weight ratio for each item
+    vector<pair<double, Item>> ratios;
+    for (auto& item : items) {
+        double ratio = (double)item.value / item.weight;
+        ratios.push_back({ratio, item});
+    }
 
-// Function to calculate the maximum value for the fractional knapsack problem
-double fractionalKnapsack(int capacity, vector<Item> &items) {
-    // Sort items by value-to-weight ratio
-    sort(items.begin(), items.end(), compareByRatio);
+    // Step 2: Sort items in descending order of ratio
+    sort(ratios.begin(), ratios.end(),
+         [](auto& a, auto& b) { return a.first > b.first; });
 
+    // Step 3: Pick items greedily
     double totalValue = 0.0;
+    for (auto& entry : ratios) {
+        Item item = entry.second;
 
-    for (const auto &item : items) {
         if (capacity >= item.weight) {
-            // If the knapsack can hold the entire item, take it completely
+            // Take full item
             capacity -= item.weight;
             totalValue += item.value;
         } else {
-            // If the knapsack can't hold the full item, take the fraction
-            totalValue += item.value * (static_cast<double>(capacity) / item.weight);
-            break; // Knapsack is full
+            // Take fractional part
+            double fraction = (double)capacity / item.weight;
+            totalValue += item.value * fraction;
+            break;
         }
     }
 
     return totalValue;
 }
 
-int main() {
-    int capacity, n;
 
-    // Input knapsack capacity
-    cout << "Enter the capacity of the knapsack: ";
+int main() {
+    int n, capacity;
+    cout << "Enter number of items: ";
+    cin >> n;
+    cout << "Enter knapsack capacity: ";
     cin >> capacity;
 
-    // Input number of items
-    cout << "Enter the number of items: ";
-    cin >> n;
-
     vector<Item> items(n);
-
-    // Input weight and value for each item
     for (int i = 0; i < n; i++) {
         cout << "Enter weight and value for item " << i + 1 << ": ";
         cin >> items[i].weight >> items[i].value;
     }
 
-    // Calculate maximum value that can be put in the knapsack
+    auto start = high_resolution_clock::now();
     double maxValue = fractionalKnapsack(capacity, items);
+    auto end = high_resolution_clock::now();
 
-    cout << "Maximum value in knapsack = " << maxValue << endl;
+    double duration = duration_cast<nanoseconds>(end - start).count();
+    int spaceUsed = sizeof(Item) * n + sizeof(int) * 2 + sizeof(double);
 
+    cout << "\n----------------------------------------\n";
+    cout << "[ Fractional Knapsack Results ]\n";
+    cout << "----------------------------------------\n";
+    cout << "Maximum Value  : " << maxValue << endl;
+    cout << "Execution Time : " << duration << " ns\n";
+    cout << "Space Used     : " << spaceUsed << " bytes\n";
+    cout << "----------------------------------------\n";
     return 0;
 }
