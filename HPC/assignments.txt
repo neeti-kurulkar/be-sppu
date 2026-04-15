@@ -1,0 +1,9 @@
+Design and implement Parallel Breadth First Search and Depth First Search based on existingalgorithms using OpenMP. Use a Tree or an undirected graph for BFS and DFS.In this assignment you will implement two parallel graph processing algorithms (BFS and DFS) using a parallel programming framework called OpenMP(Shared memory parallelization).A good implementation of this assignment will be able to run algorithms on graphs containing hundreds of millions of edges in seconds.
+
+Write a program to implement Parallel Bubble Sort and Merge sort using OpenMP. Use existing algorithms and measure the performance of sequential and parallel algorithms.In this assignment you will implement two parallel sorting algorithms (Bubble and Merge sort) using a parallel programming framework called OpenMP(Shared memory parallelization).The program will accept the input as unsorted list of integer/ float numbers and sort them in ascending order.Performance metrics- sequential time, parallel time, Speedup, efficiency
+
+Implement Min, Max, Sum and Average operations using Parallel Reduction.In this assignment you will implement Four parallel Reduction algorithms to calculate Min, Max, Sum and Average of the given numbers using Shared memory parallelization.
+
+Write a CUDA Program for :1. Addition of two large vectors2. Matrix Multiplication using CUDA C
+
+Implement accelerating a Mandelbrot fractal computation ( or any other equivalent computation) using "CUDA Python" with Numba.

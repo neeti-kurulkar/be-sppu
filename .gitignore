@@ -14,7 +14,7 @@ __pycache__/
 **/.vscode/
 
 # Jupyter notebooks
-.ipynb_checkpoints/
+**/.ipynb_checkpoints/
 
 # System files
 .DS_Store
@@ -28,3 +28,40 @@ Thumbs.db
 build/
 dist/
 *.egg-info/
+
+# Compiled binaries
+*.class
+*.exe
+*.o
+*.out
+
+# HPC compiled outputs (extension-less binaries)
+HPC/bfs
+HPC/bubblesort
+HPC/dfs
+HPC/matrix_mult
+HPC/mergesort
+HPC/reduction
+HPC/vector_addition
+
+# Datasets (images)
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+
+# ML model artifacts
+*.keras
+*.h5
+*.pkl
+*.pt
+*.pth
+
+# Dataset files (CSV)
+*.csv
+
+# Generated output directories
+**/outputs/
+
+# DL plant disease dataset
+DL/3_Plant_Disease/New Plant Diseases Dataset(Augmented)/

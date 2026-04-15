@@ -1,0 +1,39 @@
+neetikurulkar@LAPTOP-8MPLLNCH:/mnt/c/Users/NEETI/Documents/College Documents/BE Assignments/HPC$ python3 mandelbrot.py
+Neeti Kurulkar BE A 41038
+
+Running CPU Mandelbrot (480x270)...
+CPU Time: 0.3258s
+CPU estimated time at 1920x1080: 5.21s
+
+Running GPU Mandelbrot (1920x1080)...
+Traceback (most recent call last):
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 254, in ensure_initialized
+    self.cuInit(0)
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 327, in safe_cuda_api_call
+    self._check_ctypes_error(fname, retcode)
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 399, in _check_ctypes_error
+    raise CudaAPIError(retcode, msg)
+numba.cuda.cudadrv.driver.CudaAPIError: [100] Call to cuInit results in CUDA_ERROR_NO_DEVICE
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/mnt/c/Users/NEETI/Documents/College Documents/BE Assignments/HPC/mandelbrot.py", line 78, in <module>
+    d_image   = cuda.to_device(gpu_image)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/devices.py", line 231, in _require_cuda_context
+    with _runtime.ensure_context():
+  File "/usr/lib/python3.12/contextlib.py", line 137, in __enter__
+    return next(self.gen)
+           ^^^^^^^^^^^^^^
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/devices.py", line 121, in ensure_context
+    with driver.get_active_context():
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 499, in __enter__
+    driver.cuCtxGetCurrent(byref(hctx))
+    ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 292, in __getattr__
+    self.ensure_initialized()
+  File "/home/neetikurulkar/.local/lib/python3.12/site-packages/numba/cuda/cudadrv/driver.py", line 258, in ensure_initialized
+    raise CudaSupportError(f"Error at driver init: {description}")
+numba.cuda.cudadrv.error.CudaSupportError: Error at driver init: Call to cuInit results in CUDA_ERROR_NO_DEVICE (100)
+neetikurulkar@LAPTOP-8MPLLNCH:/mnt/c/Users/NEETI/Documents/College Documents/BE Assignments/HPC$
